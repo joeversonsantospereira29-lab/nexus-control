@@ -138,6 +138,7 @@ function removeFile(email, fileId) {
 }
 
 function getOrCreateSecret() {
+  if (process.env.NEXUS_SECRET) return process.env.NEXUS_SECRET;
   ensureDirs();
   try {
     return JSON.parse(fs.readFileSync(SECRET_FILE, 'utf8')).secret;
