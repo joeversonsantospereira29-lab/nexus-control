@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Nexus Control</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>" />
+</head>
+<body>
+
+  <!-- ============ LOGIN ============ -->
+  <section id="view-login" class="view">
+    <div class="card login-card">
+      <div class="logo">🛰️</div>
+      <h1>Nexus Control</h1>
+      <p class="sub">Controle seu celular e notebook de qualquer lugar, com código de verificação enviado por email.</p>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="login-email" type="email" inputmode="email" autocomplete="email" placeholder="seu@email.com" />
+      </div>
+
+      <div id="step-code" class="hidden">
+        <div class="field">
+          <label>Código de verificação</label>
+          <input id="login-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000" />
+        </div>
+        <button id="btn-verify" class="primary">Entrar</button>
+        <button id="btn-resend" class="ghost">Reenviar código</button>
+      </div>
+
+      <button id="btn-request" class="primary">Enviar código</button>
+      <p id="login-msg" class="msg"></p>
+    </div>
+  </section>
+
+  <!-- ============ PAINEL ============ -->
+  <section id="view-app" class="view hidden">
+    <header class="topbar">
+      <div class="brand">🛰️ Nexus</div>
+      <div class="topbar-right">
+        <span id="conn-state" class="dot-desc">conectando…</span>
+        <span id="me-email" class="muted small"></span>
+        <button id="btn-logout" class="ghost small">Sair</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="devices">📱 Dispositivos</button>
+      <button class="tab" data-tab="remote">🕹️ Controlar</button>
+      <button class="tab" data-tab="camera">📷 Câmera</button>
+      <button class="tab" data-tab="files">🗂️ Arquivos</button>
+      <button class="tab" data-tab="agent">🤖 Agente</button>
+      <button class="tab" data-tab="jarvis">🤖 Jarvis</button>
+    </nav>
+
+    <!-- DISPOSITIVOS -->
+    <section id="tab-devices" class="tab-panel active">
+      <div class="card">
+        <h2>Seus dispositivos</h2>
+        <div id="device-rows" class="device-rows"></div>
+        <div class="hint">Deixe este site aberto em cada aparelho para que apareçam aqui.</div>
+      </div>
+      <div class="card">
+        <h3>Status ao vivo</h3>
+        <div id="status-cards" class="status-grid"></div>
+      </div>
+    </section>
+
+    <!-- CONTROLE REMOTO -->
+    <section id="tab-remote" class="tab-panel">
+      <div class="card">
+        <h2>Controle remoto</h2>
+        <select id="remote-target" class="full"></select>
+        <p class="muted small" id="remote-target-hint"></p>
+
+        <div id="remote-phone" class="hidden">
+          <h3>📱 Ações no aparelho</h3>
+          <div class="field"><input id="rc-phone-url" placeholder="https://abrir no celular" /></div>
+          <button id="btn-phone-open" class="primary small">Abrir link</button>
+          <button id="btn-phone-vibrate" class="small">📳 Vibrar</button>
+          <button id="btn-phone-flash" class="small">🔦 Lanterna</button>
+          <button id="btn-phone-status" class="small">📊 Pedir status</button>
+          <button id="btn-phone-cam" class="small">📡 Ligar câmera</button>
+          <button id="btn-phone-camstop" class="small">⏹️ Parar câmera</button>
+        </div>
+
+        <div id="remote-agent" class="hidden">
+          <h3>💻 Comandos no notebook</h3>
+          <div class="field"><input id="rc-exec" placeholder="Comando (ex: firefox)" /></div>
+          <button id="btn-exec" class="primary small">Executar</button>
+          <button id="btn-open-app" class="small">Abrir aplicativo</button>
+          <div class="field mt"><input id="rc-url" placeholder="https://abrir no notebook" /></div>
+          <button id="btn-open-url" class="small">Abrir link</button>
+          <div class="field mt"><input id="rc-dir" value="~" /></div>
+          <button id="btn-list-dir" class="small">Listar pasta</button>
+          <pre id="rc-output" class="output"></pre>
+
+          <h3>🖥️ Tela do notebook</h3>
+          <div class="row">
+            <button id="btn-shot" class="primary small">📸 Ver tela</button>
+            <button id="btn-live" class="small">⏱️ Ao vivo</button>
+          </div>
+          <div class="screen-wrap">
+            <img id="screen-img" alt="Tela do notebook" />
+          </div>
+          <div class="row">
+            <span class="muted small">Clique na imagem = clique no mouse · segure = botão direito</span>
+          </div>
+
+          <h3>🖱️ Mouse e teclado</h3>
+          <div id="touchpad" class="touchpad">toque/arraste aqui</div>
+          <div class="row">
+            <button id="btn-right" class="small">Clique direito</button>
+            <button id="btn-scroll-up" class="small">▲</button>
+            <button id="btn-scroll-down" class="small">▼</button>
+          </div>
+          <div class="field mt"><input id="rc-key" placeholder="Teclas (ex: ctrl+c, super)" /></div>
+          <button id="btn-key" class="small">Enviar teclas</button>
+          <div class="field mt"><input id="rc-type" placeholder="Digitar texto no notebook" /></div>
+          <button id="btn-type" class="small">Digitar</button>
+        </div>
+
+        <div id="remote-none" class="muted">Nenhum dispositivo online para controlar.</div>
+        <p id="rc-status" class="msg"></p>
+      </div>
+    </section>
+
+    <!-- CAMERA -->
+    <section id="tab-camera" class="tab-panel">
+      <div class="card">
+        <h2>📷 Câmera</h2>
+        <p class="muted small">Escolha um dispositivo que esteja transmitindo a câmera (aparelho celular).</p>
+        <select id="cam-source" class="full"></select>
+        <div class="row">
+          <button id="btn-cam-watch" class="primary small">Assistir</button>
+          <button id="btn-cam-stop" class="small">Parar</button>
+        </div>
+        <div id="cam-viewer" class="hidden">
+          <img id="cam-img" alt="Câmera ao vivo" />
+        </div>
+        <p class="muted small">Para transmitir a câmera deste aparelho, use o botão abaixo. O outro dispositivo pode assistir.</p>
+        <div class="row">
+          <button id="btn-cam-start" class="primary small">📡 Transmitir minha câmera</button>
+          <button id="btn-cam-flip" class="small">🔁 Trocar câmera</button>
+          <button id="btn-cam-torch" class="small">🔦 Lanterna</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARQUIVOS -->
+    <section id="tab-files" class="tab-panel">
+      <div class="card">
+        <h2>🗂️ Central de arquivos</h2>
+        <p class="muted small">Envie arquivos aqui e baixe em qualquer dispositivo da sua conta.</p>
+        <input id="file-input" type="file" multiple />
+        <button id="btn-upload" class="primary small">Enviar arquivo</button>
+        <div id="upload-progress" class="muted small"></div>
+        <div id="file-list" class="file-list"></div>
+      </div>
+    </section>
+
+    <!-- JARVIS -->
+    <section id="tab-jarvis" class="tab-panel">
+      <div class="card jarvis-card">
+        <h2>🤖 Jarvis</h2>
+        <p class="muted small">Assistente de voz e texto. Ele controla seus dispositivos e responde falando.</p>
+        <div id="jarvis-chat" class="chat"></div>
+        <div class="row jarvis-input-row">
+          <input id="jarvis-input" placeholder="Fale ou digite algo…" autocomplete="off" />
+          <button id="btn-jarvis-send" class="primary" title="Enviar">➤</button>
+          <button id="btn-jarvis-mic" class="small" title="Falar">🎤</button>
+        </div>
+        <div class="row">
+          <label class="small jarvis-opt"><input type="checkbox" id="jarvis-tts" checked /> Responder falando</label>
+          <span id="jarvis-mic-state" class="muted small"></span>
+        </div>
+        <p class="muted small jarvis-examples">
+          Ex.: "qual a bateria do celular" · "onde está o celular" · "como está o notebook" ·
+          "ver a tela do notebook" · "abrir youtube" · "abrir o aplicativo vscode" ·
+          "executar o comando ls" · "lanterna" · "vibrar" · "ligar a câmera" · "ajuda"
+        </p>
+      </div>
+    </section>
+
+    <!-- AGENTE -->
+    <section id="tab-agent" class="tab-panel">
+      <div class="card">
+        <h2>🤖 Agente do notebook</h2>
+        <p>Para controlar totalmente o notebook (tela, mouse, teclado, abrir apps, arquivos), rode o agente nele:</p>
+        <ol>
+          <li>Copie o token abaixo e coloque no arquivo <code>.env</code> do agente.</li>
+          <li>No notebook, rode: <code>npm run agent</code></li>
+          <li>O notebook aparecerá como dispositivo e você poderá controlá-lo pelo celular.</li>
+        </ol>
+        <label>Token do agente (confidencial)</label>
+        <textarea id="agent-token" rows="4" readonly></textarea>
+        <button id="btn-copy-token" class="primary small">Copiar token</button>
+      </div>
+    </section>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

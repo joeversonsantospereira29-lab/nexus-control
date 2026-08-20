@@ -1,0 +1,19 @@
+{
+  "name": "nexus-control",
+  "version": "1.0.0",
+  "description": "Controle remoto entre celular e notebook via navegador, com verificação por email",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "agent": "node agent/agent.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.14",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
+  }
+}
