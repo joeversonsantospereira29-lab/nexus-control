@@ -74,6 +74,25 @@ function broadcastDevices(io, email) {
   }
 }
 
+// remove dispositivos antigos (sem socket ativo) há mais de 3 minutos
+const STALE_MS = 3 * 60 * 1000;
+
+function pruneStale() {
+  if (!ioRef) return 0;
+  let removed = 0;
+  const cutoff = Date.now() - STALE_MS;
+  for (const email of store.listUsers()) {
+    const online = onlineDeviceIds(email);
+    const devices = store.getDevices(email).filter((d) => !online.has(d.id) && d.lastSeen < cutoff);
+    for (const d of devices) {
+      store.removeDevice(email, d.id);
+      removed++;
+    }
+    if (devices.length) broadcastDevices(ioRef, email);
+  }
+  return removed;
+}
+
 function setup(io) {
   ioRef = io;
   io.use((socket, next) => {
@@ -182,4 +201,4 @@ function setup(io) {
   });
 }
 
-module.exports = { setup, sendCommand, getOnlineDevices };
+module.exports = { setup, sendCommand, getOnlineDevices, pruneStale };

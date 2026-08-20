@@ -81,6 +81,24 @@ function getDevices(email) {
   return user ? Object.values(user.devices) : [];
 }
 
+function listUsers() {
+  return Object.keys(db.users);
+}
+
+function pruneDevices(email, beforeMs) {
+  const user = getUser(email);
+  if (!user) return 0;
+  let removed = 0;
+  for (const id of Object.keys(user.devices)) {
+    if (user.devices[id].lastSeen < beforeMs) {
+      delete user.devices[id];
+      removed++;
+    }
+  }
+  if (removed) save();
+  return removed;
+}
+
 function getDevice(email, deviceId) {
   const user = getUser(email);
   return user && user.devices[deviceId] ? user.devices[deviceId] : null;
@@ -142,6 +160,8 @@ module.exports = {
   touchDevice,
   getDevices,
   getDevice,
+  listUsers,
+  pruneDevices,
   addFile,
   getFile,
   listFiles,

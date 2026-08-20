@@ -88,7 +88,8 @@ async function execCommand(command) {
 }
 
 async function screenshot() {
-  const tmp = `/tmp/nexus-shot-${Date.now()}.png`;
+  const id = Date.now();
+  const tmp = `/tmp/nexus-shot-${id}.png`;
   const tools = [
     `scrot "${tmp}"`,
     `import -window root "${tmp}"`,
@@ -101,6 +102,19 @@ async function screenshot() {
       try { fs.unlinkSync(tmp); } catch {}
       return { image: b64, size: b64.length };
     }
+  }
+  // fallback: xwd (captura X11) + conversão via netpbm (xwdtopnm + pnmtopng)
+  const xwd = `/tmp/nexus-shot-${id}.xwd`;
+  const res = await run(`xwd -root -silent -out "${xwd}"`);
+  if (res.code === 0 && fs.existsSync(xwd) && fs.statSync(xwd).size > 0) {
+    const conv = await run(`xwdtopnm "${xwd}" 2>/dev/null | pnmtopng > "${tmp}"`);
+    if (fs.existsSync(tmp) && fs.statSync(tmp).size > 0) {
+      const b64 = fs.readFileSync(tmp).toString('base64');
+      try { fs.unlinkSync(tmp); } catch {}
+      try { fs.unlinkSync(xwd); } catch {}
+      return { image: b64, size: b64.length };
+    }
+    try { fs.unlinkSync(xwd); } catch {}
   }
   return { error: 'Nenhuma ferramenta de screenshot encontrada. Instale: sudo apt install scrot' };
 }

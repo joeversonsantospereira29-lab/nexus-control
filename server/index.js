@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 const mailer = require('./mailer');
 const routes = require('./routes');
 const store = require('./store');
-const { setup: setupSocket } = require('./socket');
+const { setup: setupSocket, pruneStale } = require('./socket');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -41,6 +41,10 @@ const io = new Server(server, {
 mailer.init();
 app.use(routes(io));
 setupSocket(io);
+
+// limpa dispositivos antigos no início e a cada 1 minuto
+pruneStale();
+setInterval(pruneStale, 60 * 1000);
 
 server.listen(PORT, HOST, () => {
   const token = ensureAgentToken();

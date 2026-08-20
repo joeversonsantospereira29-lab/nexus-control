@@ -367,7 +367,9 @@ function renderStatusCards() {
       ? `<div class="status-card"><div class="k">${esc(name)} · rede</div><div class="v">${s.network} · ${s.online ? 'online' : 'offline'}</div></div>`
       : '';
     const mem = s.mem
-      ? `<div class="status-card"><div class="k">${esc(name)} · memória</div><div class="v">${Math.round((s.mem.used / 1024 / 1024) * 10) / 10} GB usados</div><div class="bar"><div style="width:${s.mem.percent}%"></div></div></div>`
+      ? typeof s.mem === 'object'
+        ? `<div class="status-card"><div class="k">${esc(name)} · memória</div><div class="v">${(s.mem.used / 1073741824).toFixed(1)} GB usados</div><div class="bar"><div style="width:${s.mem.percent}%"></div></div></div>`
+        : `<div class="status-card"><div class="k">${esc(name)} · memória</div><div class="v">~${s.mem} GB (estimado)</div></div>`
       : '';
     const host = s.hostname
       ? `<div class="status-card"><div class="k">${esc(name)} · sistema</div><div class="v">${esc(s.hostname)}</div></div>`
