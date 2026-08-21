@@ -94,7 +94,11 @@ async function requestCode() {
     state.email = email;
     $('#step-code').classList.remove('hidden');
     $('#btn-request').classList.add('hidden');
-    setMsg('#login-msg', 'Código enviado! Verifique seu email.', 'ok');
+    if (data.mode === 'console') {
+      setMsg('#login-msg', 'Servidor sem email configurado! O código está nos logs do Railway (variáveis MAIL_* ausentes).', 'err');
+    } else {
+      setMsg('#login-msg', 'Código enviado! Verifique seu email (e a caixa de spam).', 'ok');
+    }
   } catch (e) {
     setMsg('#login-msg', e.message, 'err');
   } finally {

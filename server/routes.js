@@ -23,9 +23,13 @@ function router(io) {
 
   r.post('/api/auth/request', async (req, res) => {
     try {
-      await auth.requestCode(req.body.email);
-      res.json({ ok: true, message: 'Código enviado. Verifique seu email.' });
+      const { mode } = await auth.requestCode(req.body.email);
+      const message = mode === 'console'
+        ? 'AVISO: o servidor está sem email configurado. O código aparece apenas nos logs do Railway.'
+        : 'Código enviado. Verifique seu email (veja também o spam).';
+      res.json({ ok: true, mode, message });
     } catch (e) {
+      console.error('[AUTH] request-code falhou:', e.message);
       res.status(400).json({ error: e.message });
     }
   });
